@@ -13,5 +13,5 @@ RUN npm install
 COPY . .
 # copies the rest of the app's code
 
-CMD ["node", "index.js"]
+CMD ["node", "server.js"]
 # starts the app using Node.js
