@@ -22,8 +22,20 @@ jobs:
       - name: Build and start containers
         run: docker-compose up -d --build
 
-      - name: Wait for services to start
-        run: sleep 30  # Adjust this if your backend takes longer to start
+      - name: List running containers
+        run: docker ps -a
+
+      - name: Show backend container logs
+        run: docker logs app || echo "No logs for backend"
+
+      - name: Show nginx container logs
+        run: docker logs nginxwebsvr || echo "No logs for nginx"
+
+      - name: Show backend container IP
+        run: |
+          IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' app)
+          echo "Backend IP: $IP"
+          curl -v http://$IP/api/hello || echo "Failed to curl backend IP"
 
       - name: Wait for backend readiness
         run: |
