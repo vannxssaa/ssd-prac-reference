@@ -4,7 +4,7 @@
 services:
   app: # node.js backend - name here matters is the name of the service
     build: ./backend # tells docker to build the image using the Dockerfile in the ./app directory
-    #container_name: backend # sets a custom name for the container (optional) - name is auto built
+    container_name: app # sets a custom name for the container (optional) - name is auto built
     volumes:
       - ./backend:/usr/src/app # mounts the local app folder into the container (so code changes reflect without rebuilding)
     working_dir: /usr/src/app # sets the working directory inside the container 
@@ -20,7 +20,7 @@ services:
     ports:
       - "80:80" # exposes port 80 (HTTP) from container to host
     volumes:
-      - ./html:/usr/share/nginx/html:ro # maps static files into the container
+     # - ./html:/usr/share/nginx/html:ro # maps static files into the container
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # mounts your custom nginx.conf file into the NGINX container, :ro makes it read-only
     depends_on:
       - app # waits for the app service before starting

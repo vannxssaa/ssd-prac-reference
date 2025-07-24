@@ -1,0 +1,33 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./index.html:/usr/share/nginx/html/index.html  # only needed for static site mode
+    depends_on:
+      - app
+    networks:
+      lab-webproxy:
+        ipv4_address: 10.11.0.6
+
+  app:
+    build:
+      context: ../backend    # adjust if your backend folder is named differently
+    container_name: app
+    ports:
+      - "3000:3000"
+    networks:
+      lab-webproxy:
+        ipv4_address: 10.11.0.7
+
+networks:
+  lab-webproxy:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.11.0.0/16
+          gateway: 10.11.0.1
