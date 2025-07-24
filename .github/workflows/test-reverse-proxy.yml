@@ -25,9 +25,9 @@ jobs:
       - name: Wait for services to start
         run: sleep 15  # Adjust based on how long your backend takes to start
 
-      - name: Test reverse proxy root endpoint
+      - name: Test reverse proxy /api/hello endpoint
         run: |
-          curl -s http://localhost/ | grep "Expected Text from Backend"
+          curl -s http://localhost/api/hello | grep '"message":"Hello from backend!"'
 
       - name: Test backend directly (optional)
         run: |
