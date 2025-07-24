@@ -27,7 +27,7 @@ jobs:
 
       - name: Test reverse proxy /api/hello endpoint
         run: |
-          curl -s http://localhost/api/hello | grep '"message":"Hello from backend!"'
+          curl -s http://localhost/api/hello | grep '{"message":"Hello from backend!"}'
 
       - name: Test backend directly (optional)
         run: |
