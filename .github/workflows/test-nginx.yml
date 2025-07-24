@@ -1,3 +1,4 @@
+# working for static nginx web page
 name: Test Nginx Hello World Page
 
 on:
