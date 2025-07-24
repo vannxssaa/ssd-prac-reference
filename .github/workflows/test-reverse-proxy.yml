@@ -14,22 +14,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Docker Compose and jq
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose jq
+      - name: Set up Docker Compose
+        uses: docker/setup-docker-compose@v2
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
 
       - name: Build and start containers
         run: docker-compose up -d --build
 
-      - name: Wait for services to start
-        run: sleep 15  # Adjust this if your backend takes longer to start
-
-      - name: Validate JSON response from /api/hello
+      - name: Wait for backend readiness
         run: |
-          response=$(curl -s http://localhost/api/hello)
-          echo "$response"
-          echo "$response" | jq -e '.message == "Hello from backend!"'
+          for i in {1..10}; do
+            if curl -s http://localhost/api/hello | jq -e '.message == "Hello from backend!"' > /dev/null; then
+              echo "Backend is ready!"
+              exit 0
+            else
+              echo "Waiting for backend..."
+              sleep 3
+            fi
+          done
+          echo "Backend did not become ready in time"
+          exit 1
 
       - name: Tear down containers
         run: docker-compose down
