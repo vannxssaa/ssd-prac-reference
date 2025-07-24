@@ -1,0 +1,15 @@
+# Ignore Git server repo data
+repos/
+
+# Ignore MySQL volume data
+mysqldata/
+mysql_data/
+
+# Ignore environment files
+.env
+
+# Node modules (if used)
+**/node_modules/
+
+# Docker logs and artifacts (optional)
+*.log

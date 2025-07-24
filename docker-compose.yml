@@ -1,0 +1,65 @@
+# docker-compose.yml
+#version: "3.9"
+
+services:
+  app: # node.js backend - name here matters is the name of the service
+    build: ./backend # tells docker to build the image using the Dockerfile in the ./app directory
+    #container_name: backend # sets a custom name for the container (optional) - name is auto built
+    volumes:
+      - ./backend:/usr/src/app # mounts the local app folder into the container (so code changes reflect without rebuilding)
+    working_dir: /usr/src/app # sets the working directory inside the container 
+    command: node server.js  # runs the node.js app when the container starts
+    ports:
+      - "3000:3000" # maps port 3000 on your computer to port 3000 inside the container
+    depends_on: 
+      - mysqldb # ensures database service starts before the node.js backend
+
+  nginx: # nginx - reverse proxy
+    image: nginx:alpine # uses the lightweight Alpine-based NGINX image
+    container_name: nginxwebsvr # custom name for this container
+    ports:
+      - "80:80" # exposes port 80 (HTTP) from container to host
+    volumes:
+      - ./html:/usr/share/nginx/html:ro # maps static files into the container
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # mounts your custom nginx.conf file into the NGINX container, :ro makes it read-only
+    depends_on:
+      - app # waits for the app service before starting
+
+  mysqldb: # MySQL database
+    image: mysql:8.0  # uses the official MySQL 8 image
+    container_name: mysqldb
+    environment: # sets up a root password and creates a database with a user
+      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    volumes:
+      - mysqldata:/var/lib/mysql # stores database data persistently in a named volume (mysqldata)
+
+  git-server:
+    build:
+      dockerfile: gitserver.Dockerfile
+      context: .
+    restart: always
+    ports:
+      - "3001:3001" # 3000 is occupied by app service
+    volumes:
+      - ./repos:/var/www/git
+
+volumes:
+  mysqldata: # declares a named volume that Docker manages to store database data persistently
+
+
+
+
+# this one maps to a file in the project called mysql_data, file needs to be created manually
+#mysqldb:
+  #image: mysql:8.0
+  #restart: always
+    #- ./db/mysql_data:/var/lib/mysql
+  #environment:
+    #MYSQL_ROOT_PASSWORD: pass
+    #MYSQL_DATABASE: testdb
+    #MYSQL_USER: user
+    #MYSQL_PASSWORD: pass
+
