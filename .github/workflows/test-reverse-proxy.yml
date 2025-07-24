@@ -14,14 +14,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Compose
-        uses: docker/setup-docker-compose@v2
-
-      - name: Install jq
-        run: sudo apt-get install -y jq
+      - name: Install Docker Compose and jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose jq
 
       - name: Build and start containers
         run: docker-compose up -d --build
+
+      - name: Wait for services to start
+        run: sleep 30  # Adjust this if your backend takes longer to start
 
       - name: Wait for backend readiness
         run: |
