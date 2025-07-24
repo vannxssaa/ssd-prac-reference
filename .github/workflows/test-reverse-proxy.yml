@@ -14,42 +14,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Docker Compose and jq
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose jq
+      - name: Install jq (assumes docker & compose pre-installed on runner)
+        run: sudo apt-get install -y jq
 
       - name: Build and start containers
         run: docker-compose up -d --build
 
-      - name: List running containers
+      - name: List running containers for debug
         run: docker ps -a
 
       - name: Show backend container logs
-        run: docker logs app || echo "No logs for backend"
+        run: docker logs app || echo "No backend logs found"
 
       - name: Show nginx container logs
-        run: docker logs nginxwebsvr || echo "No logs for nginx"
+        run: docker logs nginxwebsvr || echo "No nginx logs found"
 
-      - name: Show backend container IP
+      - name: Test backend via container IP
         run: |
-          IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' app)
+          IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ssd-prac-reference-app-1)
           echo "Backend IP: $IP"
           curl -v http://$IP/api/hello || echo "Failed to curl backend IP"
+      
 
-      - name: Wait for backend readiness
+      - name: Wait for backend readiness (up to 30 seconds)
         run: |
-          for i in {1..10}; do
-            if curl -s http://localhost/api/hello | jq -e '.message == "Hello from backend!"' > /dev/null; then
-              echo "Backend is ready!"
-              exit 0
-            else
-              echo "Waiting for backend..."
-              sleep 3
+          attempts=10
+          until curl -s http://localhost/api/hello | jq -e '.message == "Hello from backend!"' > /dev/null; do
+            attempts=$((attempts - 1))
+            if [ $attempts -le 0 ]; then
+              echo "Backend did not become ready in time"
+              exit 1
             fi
+            echo "Waiting for backend... attempts left: $attempts"
+            sleep 3
           done
-          echo "Backend did not become ready in time"
-          exit 1
+          echo "Backend is ready!"
 
       - name: Tear down containers
         run: docker-compose down
