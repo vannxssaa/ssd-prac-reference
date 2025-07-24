@@ -33,7 +33,7 @@ jobs:
 
       - name: Show backend container IP and test direct access
         run: |
-          IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ssd-prac-reference-app-1)
+          IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ssd-prac-reference-app)
           echo "Backend IP: $IP"
           curl -v http://$IP/api/hello || echo "Failed to curl backend IP"
       
