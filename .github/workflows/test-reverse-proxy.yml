@@ -25,6 +25,9 @@ jobs:
       - name: List running containers
         run: docker ps -a
 
+      - name: Show docker-compose services status
+        run: docker-compose ps
+
       - name: Show backend container logs
         run: docker logs app || echo "No logs for backend"
 
@@ -36,7 +39,6 @@ jobs:
           IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ssd-prac-reference-app)
           echo "Backend IP: $IP"
           curl -v http://$IP/api/hello || echo "Failed to curl backend IP"
-      
 
       - name: Wait for backend readiness
         run: |
