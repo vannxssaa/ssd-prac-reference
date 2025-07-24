@@ -14,17 +14,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Docker Compose
-        run: sudo apt-get update && sudo apt-get install -y docker-compose
+      - name: Install Docker Compose and jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose jq
 
       - name: Build and start containers
         run: docker-compose up -d --build
 
-      - name: Wait for backend to start
-        run: sleep 10
+      - name: Wait for services to start
+        run: sleep 15  # Adjust this if your backend takes longer to start
 
-      - name: Test reverse proxy /api/hello endpoint
-        run: curl -s http://localhost/api/hello | grep '{\"message\":\"Hello from backend!\"}'
+      - name: Validate JSON response from /api/hello
+        run: |
+          response=$(curl -s http://localhost/api/hello)
+          echo "$response"
+          echo "$response" | jq -e '.message == "Hello from backend!"'
 
       - name: Tear down containers
         run: docker-compose down
