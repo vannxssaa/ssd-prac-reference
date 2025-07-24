@@ -1,0 +1,37 @@
+name: Test NGINX Reverse Proxy with Backend
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test-nginx:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Build and start containers
+        run: docker-compose up -d --build
+
+      - name: Wait for services to start
+        run: sleep 15  # Adjust based on how long your backend takes to start
+
+      - name: Test reverse proxy root endpoint
+        run: |
+          curl -s http://localhost/ | grep "Expected Text from Backend"
+
+      - name: Test backend directly (optional)
+        run: |
+          curl -s http://localhost:3000/api/hello | grep "Expected API Response"
+
+      - name: Tear down containers
+        run: docker-compose down
